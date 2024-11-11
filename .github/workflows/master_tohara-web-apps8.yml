@@ -1,0 +1,21 @@
+name: Push Container to Azure ContainerRegistry
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY_NAME: ${{ 'toharatest8.azurecr.io' }} # {mycontainer}.azurecr.io
+      USERNAME: ${{ 'toharatest8' }}
+      PASSWORD: ${{ 'h7b6yTFNGTed6HULzkalkt6P4A0hFw+yymcwrlcU8V+ACRAEWP5A' }}
+      IMAGE_NAME: toharatest8
+    steps:
+    - uses: actions/checkout@v2
+    - run: |
+        docker login ${REGISTRY_NAME} -u ${USERNAME} -p ${PASSWORD}
+        docker build . -t ${REGISTRY_NAME}/${IMAGE_NAME}:${GITHUB_REF#refs/heads/}
+        docker push ${REGISTRY_NAME}/${IMAGE_NAME}:${GITHUB_REF#refs/heads/}

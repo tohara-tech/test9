@@ -3,6 +3,7 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 from langchain import hub
+from langchain import PromptTemplate
 from langchain.schema import AIMessage, HumanMessage
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import TextLoader
@@ -18,14 +19,14 @@ def initialize_vector_store() -> Chroma:
     """VectorStoreの初期化."""
     embeddings = AzureOpenAIEmbeddings(
         azure_deployment=os.getenv("DEPLOYMENT_EMBEDDINGS_NAME"),
-        openai_api_version="2023-03-15-preview",
+        openai_api_version="2023-05-15",
     )
 
-    vector_store_path = "/app/resources/note2.db"
+    vector_store_path = "./resources/note.db"
     if os.path.exists(vector_store_path):
         vector_store = Chroma(embedding_function=embeddings, persist_directory=vector_store_path)
     else:
-        loader = TextLoader("/app/resources/note.txt",encoding="utf-8_sig")
+        loader = TextLoader("./resources/note.txt",encoding="utf-8_sig")
         docs = loader.load()
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
@@ -41,12 +42,23 @@ def initialize_vector_store() -> Chroma:
 def initialize_retriever() -> VectorStoreRetriever:
     """Retrieverの初期化."""
     vector_store = initialize_vector_store()
+    #return vector_store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.6})
     return vector_store.as_retriever()
 
 
 def initialize_chain() -> RunnableSequence:
     """Langchainの初期化."""
-    prompt = hub.pull("rlm/rag-prompt")
+    #prompt = hub.pull("rlm/rag-prompt")
+    template = """
+        あなたは質問応答のアシスタントです。
+        質問に答えるために、contextの部分を使用してください。
+        答えがわからない場合は、contextは無視して回答してください。
+        Question: {question} 
+        Context: {context} 
+        Answer:
+    """
+    prompt = PromptTemplate(template=template)
+
     llm = AzureChatOpenAI(
         azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         openai_api_version="2024-08-01-preview",
@@ -78,6 +90,7 @@ def main() -> None:
         st.session_state.messages.append(HumanMessage(content=user_input))
         with st.spinner("GPT is typing ..."):
             response = chain.invoke(user_input)
+            print(response)
         st.session_state.messages.append(AIMessage(content=response.content))
 
     # チャット履歴の表示

@@ -11,6 +11,7 @@ from langchain_core.runnables import RunnablePassthrough, RunnableSequence
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import CharacterTextSplitter
 
 load_dotenv()
 
@@ -29,7 +30,8 @@ def initialize_vector_store() -> Chroma:
         loader = TextLoader("./resources/note.txt",encoding="utf-8_sig")
         docs = loader.load()
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        #text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=0)
+        text_splitter = CharacterTextSplitter(separator = "\\", chunk_size = 50, chunk_overlap = 20)
         splits = text_splitter.split_documents(docs)
         print(splits)
         vector_store = Chroma.from_documents(
@@ -43,7 +45,8 @@ def initialize_retriever() -> VectorStoreRetriever:
     """Retrieverの初期化."""
     vector_store = initialize_vector_store()
     #return vector_store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.6})
-    return vector_store.as_retriever()
+    return vector_store.as_retriever(search_kwargs={"k": 6})
+    #return vector_store.as_retriever()
 
 
 def initialize_chain() -> RunnableSequence:

@@ -23,11 +23,11 @@ def initialize_vector_store() -> Chroma:
         openai_api_version="2023-05-15",
     )
 
-    vector_store_path = "./resources/note.db"
+    vector_store_path = "/app/resources/note.db"
     if os.path.exists(vector_store_path):
         vector_store = Chroma(embedding_function=embeddings, persist_directory=vector_store_path)
     else:
-        loader = TextLoader("./resources/note.txt",encoding="utf-8_sig")
+        loader = TextLoader("/app/resources/note.txt",encoding="utf-8_sig")
         docs = loader.load()
 
         #text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=0)

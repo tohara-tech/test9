@@ -31,7 +31,7 @@ def initialize_vector_store() -> Chroma:
         docs = loader.load()
 
         #text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=0)
-        text_splitter = CharacterTextSplitter(separator = "\\", chunk_size = 50, chunk_overlap = 20)
+        text_splitter = CharacterTextSplitter(separator = "\n", chunk_size = 50, chunk_overlap = 20)
         splits = text_splitter.split_documents(docs)
         print(splits)
         vector_store = Chroma.from_documents(

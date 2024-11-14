@@ -64,7 +64,7 @@ def initialize_chain() -> RunnableSequence:
 
     llm = AzureChatOpenAI(
         azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        openai_api_version="2024-05-13",
+        openai_api_version="2024-02-15-preview",
         deployment_name=os.getenv("DEPLOYMENT_GPT_NAME"),
         openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),
         openai_api_type="azure",
